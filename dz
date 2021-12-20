@@ -1,0 +1,178 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ConsoleApp9
+{
+    public interface IChallenge
+    {
+        public bool Passed();
+    }
+
+    class Test : IChallenge
+    {
+        public DateTime TimeLimit { get; set; }
+        public string Question { get; set; }
+        public string Answer { get; set; }
+        public string CorrentAnswer { get; set; }
+
+        public void GiveAnswer(string answer)
+        {
+            Answer = answer;
+        }
+
+        public bool Passed()
+            => TimeLimit > DateTime.UtcNow && Answer == CorrentAnswer;
+    }
+
+    class Exam : IChallenge
+    {
+        public string Subject { get; set; }
+        public List<Test> Tests { get; set; }
+
+        public bool Passed()
+        {
+            int countPassed = Tests.Where(x => x.Passed()).Count();
+
+            return (double)countPassed / Tests.Count >= 0.5; // if 50% of tests are correct
+        }
+    }
+
+    class FinalExam : IChallenge
+    {
+        public Exam MathExam { get; set; }
+        public Exam EnglishExam { get; set; }
+
+        public FinalExam()
+        {
+            var mathTests = new List<Test>()
+            {
+                new Test()
+                {
+                    TimeLimit = DateTime.UtcNow.AddDays(7),
+                    Question = "2 + 2 = ?",
+                    CorrentAnswer = "4"
+                },
+                new Test()
+                {
+                    TimeLimit = DateTime.UtcNow.AddDays(7),
+                    Question = "100 / 10 = ?",
+                    CorrentAnswer = "10"
+                },
+                new Test()
+                {
+                    TimeLimit = DateTime.UtcNow.AddDays(7),
+                    Question = "77 + 33 = ?",
+                    CorrentAnswer = "110"
+                }
+            };
+
+            var englishTests = new List<Test>()
+            {
+                new Test()
+                {
+                    TimeLimit = DateTime.UtcNow.AddDays(7),
+                    Question = "___ you a teacher?",
+                    CorrentAnswer = "Are"
+                },
+                new Test()
+                {
+                    TimeLimit = DateTime.UtcNow.AddDays(7),
+                    Question = "___ your name Marcus?",
+                    CorrentAnswer = "Is"
+                },
+                new Test()
+                {
+                    TimeLimit = DateTime.UtcNow.AddDays(7),
+                    Question = "___ your friends from the UK?",
+                    CorrentAnswer = "Are"
+                }
+            };
+
+            this.MathExam = new Exam()
+            {
+                Subject = "Math",
+                Tests = mathTests
+            };
+
+            this.EnglishExam = new Exam()
+            {
+                Subject = "English",
+                Tests = englishTests
+            };
+        }
+
+        public bool Passed()
+        {
+            bool isMathExamPassed = MathExam.Passed();
+            bool isEnglishExamPassed = EnglishExam.Passed();
+
+            return isMathExamPassed || isEnglishExamPassed; // if one of them passed - passed, if no one - did not passed
+        }
+    }
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            FinalExam finalExam = new FinalExam();
+
+            Console.WriteLine("Final exam math exam has begun!");
+
+            foreach (var mathTest in finalExam.MathExam.Tests)
+            {
+                Console.WriteLine(mathTest.Question);
+                Console.Write("Answer: ");
+                mathTest.GiveAnswer(Console.ReadLine());
+            }
+
+            if (finalExam.MathExam.Passed())
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Congrats you've passed math exam !");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("You've failed math exam !");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            Console.WriteLine("Final exam english exam has begun!");
+
+            foreach (var englishTest in finalExam.EnglishExam.Tests)
+            {
+                Console.WriteLine(englishTest.Question);
+                Console.Write("Answer: ");
+                englishTest.GiveAnswer(Console.ReadLine());
+            }
+
+            if (finalExam.EnglishExam.Passed())
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Congrats you've passed english exam !");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("You've failed english exam !");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            if (finalExam.Passed())
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Congrats you've passed final exam !");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("You've failed final exam !");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+        }
+    }
+}
